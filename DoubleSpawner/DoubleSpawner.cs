@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using AdofaiSaves;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -72,7 +71,8 @@ namespace DoubleSpawner
             // 创建actions数组，读取original_actions
             JArray actions = Adofai["actions"] as JArray;
             // 创建actions分数组，用来写新的actions
-            JArray actionTemp = Adofai["actions"] as JArray;
+            // 感谢ChatGPT和Jiang_Tie
+            JArray actionTemp = (JArray)actions.DeepClone();
             // 要处理第几号floor
             int FloorNum = 0;
             // 旋转特色 第一下上转，第二下下转， 对应true & false
@@ -108,8 +108,6 @@ namespace DoubleSpawner
                             if ((int)actions[f]["floor"] == FloorNum && (string)actions[f]["eventType"] == "Twirl")
                             {
                                 actionTemp[f]["floor"].Replace(FloorNum * 3);
-                                bool iscation = actionTemp == actions;
-                                Lib.Error(iscation.ToString());
                                 // 下次就是下转
                                 isUpTwirl = false;
                             }
