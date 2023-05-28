@@ -58,11 +58,16 @@ namespace DoubleSpawner
                 return;
             }
             MapLoader();
-            maint = new Thread(MainThreard);
-            select.Enabled = false;
-            maint.Start();
+            if (MapNum != 0)
+            {
+                maint = new Thread(MainThreard);
+                select.Enabled = false;
+                maint.Start();
+            }
+            
         }
 
+        // 主线程
         private void MainThreard()
         {
             isModeRunning = true;
@@ -188,7 +193,6 @@ namespace DoubleSpawner
                 {
                     status.Text = "此谱面使用的是pathData,请按照UP视频里的方式转化为angleData";
                     return;
-
                 }
                 status.Text = "已成功获取谱面信息";
                 return;
