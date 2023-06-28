@@ -26,7 +26,7 @@ namespace DoubleSpawner
         int MapNum = 0;
         // Adofai Json
         JObject Adofai;
-        
+
 
         public DoubleSpawner()
         {
@@ -64,7 +64,7 @@ namespace DoubleSpawner
                 select.Enabled = false;
                 maint.Start();
             }
-            
+
         }
 
         // 主线程
@@ -82,16 +82,63 @@ namespace DoubleSpawner
             int FloorNum = 0;
             // 旋转特色 第一下上转，第二下下转， 对应true & false
             bool isUpTwirl = true;
+            // 被中旋改变过actions 的 floor
+            JArray actionBeChanged = new JArray();
             // 读取angleData数据
             foreach (int a in Adofai["angleData"].Select(v => (int)v))
             {
+                Console.WriteLine(actionBeChanged);
                 // 现在处理的是第几号floor
                 FloorNum++;
                 // 显示状态
                 status.Text = "处理进度: " + FloorNum + " / " + MapNum;
+                if (a == 999)
+                {
+                    // 获取angledata的上两位(即双押之前的angle) 
+                    // 由于不存在谱面第一个格子是中旋的情况，所以不做判断
+                    int TempAngle = (int)angleData[angleData.Count - 3];
+                    angleData.Remove(angleData[angleData.Count - 3]);
+                    angleData.Remove(angleData[angleData.Count - 2]);
+                    angleData.Remove(angleData[angleData.Count - 1]);
+                    if (isUpTwirl) 
+                    {
+                        angleData.Add(TempAngle - 5);
+                        angleData.Add(999);
+                        angleData.Add(TempAngle - 10);
+                        angleData.Add(999);
+                    }
+                    else
+                    {
+                        angleData.Add(TempAngle + 5);
+                        angleData.Add(999);
+                        angleData.Add(TempAngle + 10);
+                        angleData.Add(999);
+                    }
+                    // 判断actions
+                    if (actions.Count > 0)
+                    {
+                        for (int f = 0; f < actions.Count; f++)
+                        {
+                            if ((int)actionTemp[f]["floor"] >= FloorNum)
+                            {
+                                actionTemp[f]["floor"].Replace((int)actionTemp[f]["floor"] * 3 - 2);
+                                actions[f]["floor"].Replace((int)actionTemp[f]["floor"] * 3 - 2);
+                                // 防止再次修改，单独存放数组
+                                if (!actionBeChanged.Contains(actionTemp[f]["floor"]))
+                                {
+                                    actionBeChanged.Add(actionTemp[f]["floor"]);
+                                }
+                                
+                            }
+                        }
+                    }
+                    continue;
+                }
+                
+                // 将原始数据写入数组
                 angleData.Add(a);
+
                 // 如果下次是上转
-                // 添加双押信息
                 if (isUpTwirl)
                 {
                     // 判断角度
@@ -104,17 +151,25 @@ namespace DoubleSpawner
                         angleData.Add(a + 165);
                     }
                     angleData.Add(999);
+                    
                     // 判断旋转
                     if (actions.Count > 0)
                     {
                         for (int f = 0; f < actions.Count; f++)
                         {
-                            // 判断floor + Twirl
+                            // 判断Twirl
                             if ((int)actions[f]["floor"] == FloorNum && (string)actions[f]["eventType"] == "Twirl")
                             {
-                                actionTemp[f]["floor"].Replace(FloorNum * 3);
                                 // 下次就是下转
                                 isUpTwirl = false;
+                            }
+                            else if ((int)actions[f]["floor"] == FloorNum)
+                            {
+                                // 判断是否需要修改actions
+                                if (!actionBeChanged.Contains(actionTemp[f]["floor"]))
+                                {
+                                    actionTemp[f]["floor"].Replace(FloorNum * 3);
+                                }
                             }
                         }
                     }
@@ -129,14 +184,22 @@ namespace DoubleSpawner
                     {
                         for (int f = 0; f < actions.Count; f++)
                         {
-                            // 判断floor + Twirl
+                            // 判断Twirl
                             if ((int)actions[f]["floor"] == FloorNum && (string)actions[f]["eventType"] == "Twirl")
                             {
-                                actionTemp[f]["floor"].Replace(FloorNum * 3 - 2);
                                 angleData.Add(a - 195);
                                 angleData.Add(999);
                                 // 下次就是上转
                                 isUpTwirl = true;
+                            }
+                            // 修改actions
+                            if ((int)actions[f]["floor"] == FloorNum)
+                            {
+                                // 判断是否需要修改actions
+                                if (!actionBeChanged.Contains(actionTemp[f]["floor"]))
+                                {
+                                    actionTemp[f]["floor"].Replace(FloorNum * 3 - 2);
+                                }
                             }
                         }
                     }
@@ -152,7 +215,7 @@ namespace DoubleSpawner
                             angleData.Add(a + 195);
                         }
                         angleData.Add(999);
-                    } 
+                    }
                 }
             }
             // Merge
