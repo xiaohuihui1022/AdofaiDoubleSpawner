@@ -61,7 +61,6 @@
       <DependentUpon>DoubleSpawner.cs</DependentUpon>
     </Compile>
     <Compile Include="Lib.cs" />
-    <Compile Include="p2a.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="DoubleSpawner.resx">
