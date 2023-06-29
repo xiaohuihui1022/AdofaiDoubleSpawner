@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DoubleSpawner));
             this.select = new System.Windows.Forms.Button();
             this.status = new System.Windows.Forms.Label();
             this.SuspendLayout();
@@ -59,6 +60,7 @@
             this.Controls.Add(this.status);
             this.Controls.Add(this.select);
             this.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "DoubleSpawner";
             this.Text = "Adofai双押生成器";

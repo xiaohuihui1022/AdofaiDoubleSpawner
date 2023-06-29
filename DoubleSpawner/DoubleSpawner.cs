@@ -205,9 +205,9 @@ namespace DoubleSpawner
                     if (isUpTwirl)
                     {
                         // 判断角度
-                        if (a + 165 > 365)
+                        if (a + 165 > 360)
                         {
-                            angleData.Add(a + 165 - 365);
+                            angleData.Add(a - 195);
                         }
                         else
                         {
@@ -215,7 +215,6 @@ namespace DoubleSpawner
                         }
                         angleData.Add(999);
                     }
-
 
                     // 判断旋转
                     if (actions.Count > 0)
@@ -264,9 +263,9 @@ namespace DoubleSpawner
                     if (!isUpTwirl)
                     {
 
-                        if (a + 195 > 365)
+                        if (a + 195 > 360)
                         {
-                            angleData.Add(a + 195 - 365);
+                            angleData.Add(a + 195 - 360);
                         }
                         else
                         {
@@ -316,7 +315,28 @@ namespace DoubleSpawner
                 }
                 else
                 {
-                    status.Text = "此谱面使用的是pathData,请按照UP视频里的方式转化为angleData";
+                    // status.Text = "此谱面使用的是pathData,请按照UP视频里的方式转化为angleData";
+                    string pathData = Adofai["pathData"].ToString();
+                    MapNum = pathData.Length;
+                    status.Text = "正在转换pathData为angleData";
+                    JArray angleData = new JArray();
+                    P2a p2a = new P2a();
+                    p2a.MapSet();
+                    for (int a = 0; a < MapNum; a++)
+                    {
+                        int angle = 0;
+                        try
+                        {
+                            angle = (int)p2a.Map[pathData[a]];
+                        }
+                        catch (Exception e)
+                        {
+                            angle = (int)p2a.Map[p2a.FlipPath(pathData[a])];
+                        }
+                        angleData.Add(angle);
+                    }
+                    Adofai.Remove("pathData");
+                    Adofai.Add("angleData", angleData);
                     return;
                 }
                 status.Text = "已成功获取谱面信息";

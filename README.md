@@ -16,7 +16,7 @@
 过添加兔子的方式使音画同步
 
 ### 2、
-本软件目前仅支持angleData，pathData的谱子可以通过
+本软件的pathData - angleData转换有点问题，如果发现有问题可以通过项目
 [Adofai-Map-Converter](https://github.com/Luxusio/ADOFAI-Map-Converter)
 转换谱面透明度为100%，谱子就从pathData转为angeData了
 
