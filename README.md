@@ -11,13 +11,11 @@
 ## 注意：
 
 ### 1、
-
 因为冰与火的中旋双押一定程度上会影响谱面播放速度，所以需要转换完成后自行修改BPM，或通
 
 过添加兔子的方式使音画同步
 
 ### 2、
-
 本软件目前仅支持angleData，pathData的谱子可以通过
 [Adofai-Map-Converter](https://github.com/Luxusio/ADOFAI-Map-Converter)
 转换谱面透明度为100%，谱子就从pathData转为angeData了
