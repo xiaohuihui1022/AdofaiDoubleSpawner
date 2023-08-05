@@ -26,7 +26,7 @@ namespace DoubleSpawner
         int MapNum = 0;
         // Adofai Json
         JObject Adofai;
-        
+
 
 
         public DoubleSpawner()
@@ -65,20 +65,13 @@ namespace DoubleSpawner
                 select.Enabled = false;
                 maint.Start();
             }
-            
+
         }
 
-        private int TurnFloor(int FloorNum, int countMidTwirl, bool isUpTwirl)
+        private int TurnFloor(int FloorNum, int countMidTwirl)
         {
-            // 先还原成无中旋状态，之后加数据
-            if (isUpTwirl)
-            {
-                return (FloorNum - (2 * countMidTwirl)) * 3 + (4 * countMidTwirl);
-            }
-            else
-            {
-                return (FloorNum - (2 * countMidTwirl)) * 3 - 2 + (4 * countMidTwirl);
-            }
+            return (FloorNum - (2 * countMidTwirl)) * 3 - 2 + (4 * countMidTwirl);
+            
         }
         // 主线程
         private void MainThreard()
@@ -118,15 +111,7 @@ namespace DoubleSpawner
                     // 判断旋转
                     if (isUpTwirl)
                     {
-                        // 判断要加的双押是否在不断档范围之内
-                        if (TempAngle >= (int)angleData[angleData.Count - 3])
-                        {
-                            TempAngle -= 5;
-                            // 添加双押
-                            angleData.Add(TempAngle);
-                            angleData.Add(999);
-                        }
-                        // 有90°旋转
+                        // actions
                         if (actions.Count > 0)
                         {
                             for (int f = 0; f < actions.Count; f++)
@@ -142,7 +127,7 @@ namespace DoubleSpawner
                                 }
                                 if ((int)actions[f]["floor"] == FloorNum)
                                 {
-                                    actionTemp[f]["floor"].Replace(TurnFloor(FloorNum, countMidTwirl, true));
+                                    actionTemp[f]["floor"].Replace(TurnFloor(FloorNum, countMidTwirl));
                                 }
                             }
                         }
@@ -151,20 +136,14 @@ namespace DoubleSpawner
                         {
                             angleData.Add(TempAngle - 5);
                             angleData.Add(999);
+                            angleData.Add(TempAngle - 10);
+                            angleData.Add(999);
                         }
 
                     }
                     else
                     {
-                        // 判断要加的双押是否在不断档范围之内
-                        if (TempAngle <= (int)angleData[angleData.Count - 3])
-                        {
-                            TempAngle -= 5;
-                            // 添加双押
-                            angleData.Add(TempAngle);
-                            angleData.Add(999);
-                        }
-                        // 有90°旋转
+                        // actions
                         if (actions.Count > 0)
                         {
                             for (int f = 0; f < actions.Count; f++)
@@ -180,7 +159,7 @@ namespace DoubleSpawner
                                 }
                                 if ((int)actions[f]["floor"] == FloorNum)
                                 {
-                                    actionTemp[f]["floor"].Replace(TurnFloor(FloorNum, countMidTwirl, false));
+                                    actionTemp[f]["floor"].Replace(TurnFloor(FloorNum, countMidTwirl));
                                 }
                             }
                         }
@@ -189,10 +168,12 @@ namespace DoubleSpawner
                         {
                             angleData.Add(TempAngle + 5);
                             angleData.Add(999);
+                            angleData.Add(TempAngle + 10);
+                            angleData.Add(999);
                         }
-                        
+
                     }
-                    
+
                     continue;
                 }
                 angleData.Add(a);
@@ -200,7 +181,27 @@ namespace DoubleSpawner
                 // 添加双押信息
                 if (isUpTwirl)
                 {
-                    
+
+                    // 判断actions
+                    if (actions.Count > 0)
+                    {
+                        for (int f = 0; f < actions.Count; f++)
+                        {
+                            // 判断floor + Twirl
+                            if ((int)actions[f]["floor"] == FloorNum && (string)actions[f]["eventType"] == "Twirl")
+                            {
+                                angleData.Add(a - 165);
+                                angleData.Add(999);
+                                // 下次就是下转
+                                isUpTwirl = false;
+                            }
+                            if ((int)actions[f]["floor"] == FloorNum)
+                            {
+                                actionTemp[f]["floor"].Replace(TurnFloor(FloorNum, countMidTwirl));
+                            }
+                        }
+                    }
+
                     // 正常情况
                     if (isUpTwirl)
                     {
@@ -215,31 +216,12 @@ namespace DoubleSpawner
                         }
                         angleData.Add(999);
                     }
-
-                    // 判断旋转
-                    if (actions.Count > 0)
-                    {
-                        for (int f = 0; f < actions.Count; f++)
-                        {
-                            // 判断floor + Twirl
-                            if ((int)actions[f]["floor"] == FloorNum && (string)actions[f]["eventType"] == "Twirl")
-                            {
-                                // 下次就是下转
-                                isUpTwirl = false;
-                            }
-                            if ((int)actions[f]["floor"] == FloorNum)
-                            {
-                                actionTemp[f]["floor"].Replace(TurnFloor(FloorNum, countMidTwirl, true));
-                            }
-                        }
-                    }
-
                 }
                 // 如果下转
                 else
                 {
 
-                    // 有90°旋转
+                    // 有actions
                     if (actions.Count > 0)
                     {
                         for (int f = 0; f < actions.Count; f++)
@@ -254,7 +236,7 @@ namespace DoubleSpawner
                             }
                             if ((int)actions[f]["floor"] == FloorNum)
                             {
-                                actionTemp[f]["floor"].Replace(TurnFloor(FloorNum, countMidTwirl, false));
+                                actionTemp[f]["floor"].Replace(TurnFloor(FloorNum, countMidTwirl));
                             }
                         }
                     }
@@ -308,7 +290,7 @@ namespace DoubleSpawner
                 }
                 status.Text = "正在备份谱面文件到" + adofaiDirectoryName + @"\original_" + adofaiMapName;
                 File.Copy(AdofaiSpectralFile, adofaiDirectoryName + @"\original_" + adofaiMapName);
-                
+
                 if (Adofai.ContainsKey("angleData"))
                 {
                     MapNum = Adofai["angleData"].Count();
@@ -324,13 +306,16 @@ namespace DoubleSpawner
                     p2a.MapSet();
                     for (int a = 0; a < MapNum; a++)
                     {
+                        Console.WriteLine(pathData[a]);    
                         int angle = 0;
-                        try
+                        if (p2a.Map.Contains(pathData[a])) 
                         {
+                            Console.WriteLine("contains");
                             angle = (int)p2a.Map[pathData[a]];
                         }
-                        catch (Exception e)
+                        else
                         {
+                            Console.WriteLine("noob");
                             angle = (int)p2a.Map[p2a.FlipPath(pathData[a])];
                         }
                         angleData.Add(angle);
