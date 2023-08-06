@@ -333,7 +333,7 @@ namespace DoubleSpawner
                 status.Text = "发生了意料之外的错误，可能是您的谱面文件格式有误\n" +
                     "请打开json.cn网站并且将谱面文件内容复制进去进行检验";
                 MessageBox.Show(e.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                throw;
             }
         }
 
